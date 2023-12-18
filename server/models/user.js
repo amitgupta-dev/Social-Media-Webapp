@@ -69,6 +69,10 @@ const UserSchema = new mongoose.Schema({
     familyType: String,
     nickname: String,
     quote: String,
+    requests: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Request"
+    }],
     isVerified: {
         type: Boolean,
         default: false
