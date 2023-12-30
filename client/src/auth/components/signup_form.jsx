@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { setName, setEmail, setPassword, setAcceptTAndC, setGender, setDob } from '../../redux/slices/SignupSlice'
 import axios from 'axios'
@@ -7,7 +7,7 @@ import axios from 'axios'
 const SignupForm = () => {
 
     const [isLoading, setLoading] = useState(false)
-
+    const navigate = useNavigate()
     const dispatch = useDispatch()
     const signup_data = useSelector((state) => state.signup)
 
@@ -15,8 +15,8 @@ const SignupForm = () => {
         event.preventDefault()
         try {
             setLoading(true)
-            const response = await axios.post("api/user/signup", signup_data)
-            console.log(response)
+            const response = await axios.post("http://localhost:5000/auth/signup", signup_data, { withCredentials: true })
+            navigate('/')
         }
         catch (err) {
             console.log("Signup Failed", err.message)
@@ -84,7 +84,7 @@ const SignupForm = () => {
             <div className=' w-full flex justify-between'>
                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                     Already have an account?
-                    <Link href="/signin" className="font-medium text-violet-600 hover:underline dark:text-primary-500">Login here</Link>
+                    <Link to="/login" className="font-medium text-violet-600 hover:underline dark:text-primary-500">Login here</Link>
                 </p>
                 <p className={`text-gray-500 animate-pulse hidden ${isLoading && "block"}`}>User is being created...</p>
             </div>

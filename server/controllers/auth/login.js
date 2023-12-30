@@ -26,26 +26,28 @@ const login = async (req, res) => {
             })
         }
 
-        const tokenData = {
+        const payload = {
             id: searchedUser._id,
-            name: searchedUser.name,
-            email: searchedUser.email
         }
 
-        const token = jwt.sign(tokenData, process.env.TOKEN_SECRET, { expiresIn: "1d" })
+        const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "1d" })
 
         searchedUser.password = undefined
 
         res.cookie("token", token, {
             httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000
+            secure: true,
+            sameSite: 'strict',
+            domain: 'localhost',
+            path: '/',
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
         })
 
         return res.json({
             success: true,
-            message: "Signin successful",
+            message: "Login successful",
             user: searchedUser
-        }).status(200)
+        })
     }
     catch (error) {
         console.log(error)

@@ -1,8 +1,9 @@
 const User = require('../../models/user')
 
-const getUser = async (req, res) => {
+const getAuthenticatedUser = async (req, res) => {
     try {
-        let { id } = req.params
+        let { id } = req.user
+        console.log(id)
 
         // check if user exists
         const searchedUser = await User.findById({ _id: id })
@@ -33,4 +34,4 @@ const getUser = async (req, res) => {
     }
 }
 
-module.exports = { getUser }
+module.exports = { getAuthenticatedUser }

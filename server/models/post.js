@@ -3,7 +3,12 @@ const mongoose = require('mongoose')
 const PostSchema = new mongoose.Schema({
     postType: {
         type: String,
-        enum: ["text", "image", "video"],
+        enum: ["text", "image", "video", "reel", "story"],
+        required: true
+    },
+    visibility: {
+        type: String,
+        enum: ["private", "public"],
         required: true
     },
     text: {
@@ -12,13 +17,13 @@ const PostSchema = new mongoose.Schema({
             return this.postType === 'text'
         },
     },
-    image: {
+    imageUrl: {
         type: String,
         required: function () {
             return this.postType === 'image'
         },
     },
-    video: {
+    videoUrl: {
         type: String,
         required: function () {
             return this.postType === 'video'
@@ -32,28 +37,22 @@ const PostSchema = new mongoose.Schema({
     createdAt: {
         type: Number,
         default: Date.now(),
-        required: true,
+        required: true
     },
-    likes: {
-        count: {
-            type: Number,
-            default: 0,
-            required: true
-        },
-        likedBy: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        }]
+    updatedAt: {
+        type: Number,
+        default: Date.now(),
+        required: true
     },
-    comments: {
-        count: {
-            type: Number,
-            required: true
-        },
-        comments: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Comment",
-        }]
+    likesCount: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    commentsCount: {
+        type: Number,
+        default: 0,
+        required: true
     }
 })
 

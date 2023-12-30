@@ -2,9 +2,17 @@ const mongoose = require('mongoose')
 
 const LikeSchema = new mongoose.Schema({
     entity: {
-        type: String,
-        required: true,
-        enum: ["post", "comment"],
+        entityId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: function () {
+                return this.entityType === "post" ? "Post" : "Comment";
+            },
+        },
+        entityType: {
+            type: String,
+            required: true,
+            enum: ["post", "comment"]
+        }
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,

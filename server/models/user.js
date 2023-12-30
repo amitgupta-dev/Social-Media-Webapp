@@ -37,10 +37,11 @@ const UserSchema = new mongoose.Schema({
     ],
     createdAt: {
         type: Number,
+        required: true
     },
     updatedAt: {
         type: Number,
-        default: Number
+        required: true
     },
     work: [
         {

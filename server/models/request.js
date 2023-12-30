@@ -7,24 +7,30 @@ const RequestSchema = new mongoose.Schema({
     },
     createdFor: {
         type: String,
-        enum: ["JoinGroup", "AddGroupPost", "AddFriend"],
+        enum: ["joinGroup", "groupPost", "friendship"],
         required: true
     },
-    sentTo: [{
+    receiver: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-    }],
-    receivedFrom: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-    }],
-    status: [{
+        ref: function () {
+            if (this.createdFor === "friendship") return "User"
+            if (this.createdFor === "joinGroup" || this.createdFor === "groupPost") return "Group"
+        },
+    },
+    status: {
         type: String,
-        enum: ["Accepted", "Rejected", "Pending"]
-    }],
-
+        default: "pending",
+        enum: ["accepted", "pejected", "pending"]
+    },
+    createdAt: {
+        type: Number,
+        required: true
+    },
+    updatedAt: {
+        type: Number
+    }
 })
 
 const Request = mongoose.model('Request', RequestSchema)
 
-export default Request
+module.exports = Request

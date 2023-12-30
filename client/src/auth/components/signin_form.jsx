@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
@@ -7,7 +7,7 @@ import { setEmail, setSigninPassword, setRememberMe } from '../../redux/slices/S
 const SigninForm = () => {
 
     const [isLoading, setLoading] = useState(false)
-
+    const navigate = useNavigate()
     const dispatch = useDispatch()
     const signin_data = useSelector((state) => state.signin)
 
@@ -15,8 +15,8 @@ const SigninForm = () => {
         event.preventDefault()
         try {
             setLoading(true)
-            const response = await axios.post("/api/user/signin", signin_data)
-            console.log(response.data)
+            await axios.post("http://localhost:5000/auth/login", signin_data, { withCredentials: true })
+            navigate('/')
         }
         catch (err) {
             console.log(err)
@@ -49,10 +49,9 @@ const SigninForm = () => {
             </div>
             <button type="submit" className="text-white w-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Signin</button>
             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                Don't have an account yet? <Link href="/signup" className="font-medium text-violet-600 hover:underline dark:text-primary-500">Sign up</Link>
+                Don't have an account yet? <Link to="/signup" className="font-medium text-violet-600 hover:underline dark:text-primary-500">Sign up</Link>
             </p>
         </form>
     )
 }
-
 export default SigninForm

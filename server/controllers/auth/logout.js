@@ -1,4 +1,4 @@
-const logout = (res) => {
+const logout = (req, res) => {
     try {
         res.cookie("token", "", { httpOnly: true, maxAge: 0 })
         return res.json({

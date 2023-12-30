@@ -1,5 +1,5 @@
 'use client'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { GoHome } from "react-icons/go"
 import { GoHomeFill } from "react-icons/go"
 import { RxAvatar } from "react-icons/rx";
@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 const Navbar = () => {
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     useEffect(() => {
         dispatch(fetchUserData())
@@ -34,20 +35,20 @@ const Navbar = () => {
 
     const [isLoading, setLoading] = useState(false)
 
-    // const logout = async () => {
-    //     try {
-    //         setLoading(true)
-    //         const response = await axios.get("/api/user/signout")
-    //         console.log(response.data)
-    //         router.push("/signin")
-    //     }
-    //     catch (err) {
-    //         console.log(err)
-    //     }
-    //     finally {
-    //         setLoading(false)
-    //     }
-    // }
+    const logout = async () => {
+        try {
+            setLoading(true)
+            const response = await axios.get("http://localhost:5000/auth/logout")
+            console.log(response)
+            navigate('/login')
+        }
+        catch (err) {
+            console.log(err)
+        }
+        finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <nav className="bg-white flex absolute h-16 w-full md:h-auto justify-between sm:px-5 shadow-md dark dark:bg-gray-900 z-10">
@@ -110,9 +111,8 @@ const Navbar = () => {
                             </Link>
                         </div>
                         <div className="">
-                            <button className="w-full px-5 py-2 hover:bg-gray-100 flex">
-                                <p className="text-sm flex gap-2 font-medium text-gray-800 leading-none"><MdLogout size={17} />Logout
-                                </p>
+                            <button onClick={logout} className="w-full px-5 py-2 hover:bg-gray-100 flex">
+                                <p className="text-sm flex gap-2 font-medium text-gray-800 leading-none"><MdLogout size={17} />Logout</p>
                             </button>
                         </div>
                     </div>

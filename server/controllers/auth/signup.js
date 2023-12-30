@@ -1,5 +1,6 @@
 const User = require('../../models/user')
 const bcryptjs = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const signup = async (req, res) => {
     try {
@@ -21,7 +22,7 @@ const signup = async (req, res) => {
         const hashedPassword = await bcryptjs.hash(password, salt)
 
         const newUser = new User({
-            avatar: `${gender === "Male" ? "https://res.cloudinary.com/dfokdktd4/image/upload/v1702699967/Avatars%20And%20Covers/static%20images/hqyzp0l2jkcqmocghmg1.jpg" : "https://res.cloudinary.com/dfokdktd4/image/upload/v1702699949/Avatars%20And%20Covers/static%20images/snvyy3xw3gosv03empjx.jpg"}`,
+            avatar: `${gender === "Male" ? "https://res.cloudinary.com/dfokdktd4/image/upload/v1703744555/Avatars%20And%20Covers/static%20images/zedpbedekdq0meglqacy.jpg" : "https://res.cloudinary.com/dfokdktd4/image/upload/v1703744590/Avatars%20And%20Covers/static%20images/kp96wd8jxe2uc1m4t6jf.jpg"}`,
             cover: "https://res.cloudinary.com/dfokdktd4/image/upload/v1702701463/Avatars%20And%20Covers/static%20images/ge1hjhe8ywsvcsmnb7h7.png",
             name,
             email,
@@ -39,6 +40,20 @@ const signup = async (req, res) => {
         createdUser.password = undefined
 
         console.log(createdUser)
+
+        const payload = {
+            id: createdUser._id,
+        }
+        const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "1d" })
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            domain: 'localhost',
+            path: '/',
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        })
 
         return res.json({
             success: true,
