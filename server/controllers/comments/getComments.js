@@ -18,7 +18,7 @@ const getComments = async (req, res) => {
             }).status(200)
         }
         else {
-            const { entityId } = req.request
+            const { entityId } = req.query
 
             const searchedComments = await Comment.find({ "entity.entityId": entityId })
                 .populate({

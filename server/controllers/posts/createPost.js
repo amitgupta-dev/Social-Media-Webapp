@@ -1,10 +1,21 @@
 const Post = require('../../models/post')
 
 const createPost = async (req, res) => {
-    const { postType, visibility, text, imageUrl, videoUrl } = req.body
+    const { postType, postLocation, groupId, isApproved, pageId, visibility, text, imageUrl, videoUrl } = req.body
+
+    const conditionalFields = {}
+
+    if (postLocation === 'group') {
+        conditionalFields.groupId = groupId
+        conditionalFields.isApproved = isApproved
+    } else if (postLocation === 'page') {
+        conditionalFields.pageId = pageId
+    }
 
     const newPost = new Post({
         postType,
+        postLocation,
+        ...conditionalFields,
         visibility: visibility || "public",
         text,
         imageUrl,

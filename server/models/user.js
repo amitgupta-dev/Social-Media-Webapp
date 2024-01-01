@@ -23,18 +23,6 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    posts: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Post'
-        }
-    ],
-    friends: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }
-    ],
     createdAt: {
         type: Number,
         required: true
@@ -70,10 +58,6 @@ const UserSchema = new mongoose.Schema({
     familyType: String,
     nickname: String,
     quote: String,
-    requests: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Request"
-    }],
     isVerified: {
         type: Boolean,
         default: false

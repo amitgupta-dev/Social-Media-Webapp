@@ -6,6 +6,15 @@ const PostSchema = new mongoose.Schema({
         enum: ["text", "image", "video", "reel", "story"],
         required: true
     },
+    postLocation: {
+        type: String,
+        required: true,
+        enum: ["group", "page", "user"]
+    },
+    isApproved: {
+        type: Boolean,
+        required: function () { return this.postLocation === "group" }
+    },
     visibility: {
         type: String,
         enum: ["private", "public"],

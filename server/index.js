@@ -29,6 +29,8 @@ const commentRoutes = require('./routes/commentRoutes')
 const postRoutes = require('./routes/postRoutes')
 const likeRoutes = require('./routes/likeRoutes')
 const requestRoutes = require('./routes/requestRoutes')
+const groupRoutes = require('./routes/groupRoutes')
+const memberRoutes = require('./routes/memberRoutes')
 
 // routes
 app.get('/', (req, res) => { res.send("Welcome to the treddy backend") })
@@ -38,5 +40,7 @@ app.use('/comment', verifyUser, commentRoutes)
 app.use('/post', verifyUser, postRoutes)
 app.use('/like', verifyUser, likeRoutes)
 app.use('/request', verifyUser, requestRoutes)
+app.use('/group', verifyUser, groupRoutes)
+app.use('/member', verifyUser, memberRoutes)
 
 connect(process.env.MONGO_URL, '5000', app)
