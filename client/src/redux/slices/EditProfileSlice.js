@@ -26,6 +26,7 @@ export const EditProfileSlice = createSlice({
             state.avatar = action.payload
         },
         setCover: (state, action) => {
+            console.log("slice:", action.payload)
             state.cover = action.payload
         },
         setEmail: (state, action) => {
@@ -67,20 +68,29 @@ export const EditProfileSlice = createSlice({
         addPlacesLived: (state, action) => {
             state.placesLived = [...state.placesLived, action.payload]
         },
-        setWork: (state, action) => {
+        setWorkField: (state, action) => {
             const { index, field, value } = action.payload
             state.work[index] = { ...state.work[index], [field]: value }
         },
-        setEducation: (state, action) => {
+        setEducationField: (state, action) => {
             const { index, field, value } = action.payload
             state.education[index] = { ...state.education[index], [field]: value }
         },
-        setPlacesLived: (state, action) => {
+        setPlacesLivedField: (state, action) => {
             const { index, field, value } = action.payload
             state.placesLived[index] = { ...state.placesLived[index], [field]: value }
+        },
+        setWork: (state, action) => {
+            state.work = action.payload
+        },
+        setEducation: (state, action) => {
+            state.education = action.payload
+        },
+        setPlacesLived: (state, action) => {
+            state.placesLived = action.payload
         }
     },
 })
 
-export const { setAvatar, setCover, setEmail, setName, setPhone, setDob, setNickname, setGender, setFamilyType, setRelationship, setAbout, setQuote, addWork, addEducation, addPlacesLived, setWork, setEducation, setPlacesLived } = EditProfileSlice.actions
+export const { setAvatar, setCover, setEmail, setName, setPhone, setDob, setNickname, setGender, setFamilyType, setRelationship, setAbout, setQuote, addWork, addEducation, addPlacesLived, setWorkField, setEducationField, setPlacesLivedField, setWork, setEducation, setPlacesLived } = EditProfileSlice.actions
 export default EditProfileSlice.reducer

@@ -34,6 +34,7 @@ const createPost = async (req, res) => {
         }).status(200)
     }
     catch (error) {
+        console.log(error)
         return res.json({
             success: false,
             message: "something went wrong"

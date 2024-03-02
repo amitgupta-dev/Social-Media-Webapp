@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
 
 export const fetchUserData = createAsyncThunk('fetchUserData', async () => {
-    const response = await axios.get("http://localhost:5000/user")
+    const response = await axios.get(`${import.meta.env.VITE_SERVER_BASE_URL}/user`, { withCredentials: true })
     console.log(response)
     return response.data.user;
 })

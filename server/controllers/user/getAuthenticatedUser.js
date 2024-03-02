@@ -3,7 +3,6 @@ const User = require('../../models/user')
 const getAuthenticatedUser = async (req, res) => {
     try {
         let { id } = req.user
-        console.log(id)
 
         // check if user exists
         const searchedUser = await User.findById({ _id: id })
@@ -14,8 +13,6 @@ const getAuthenticatedUser = async (req, res) => {
                 message: "user not found"
             })
         }
-
-        console.log(searchedUser)
 
         searchedUser.password = undefined
 

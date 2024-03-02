@@ -10,6 +10,7 @@ const updateUser = async (req, res) => {
         about,
         phone,
         gender,
+        dob,
         work,
         education,
         placesLived,
@@ -34,6 +35,7 @@ const updateUser = async (req, res) => {
         if (about) searchedUser.about = about
         if (phone) searchedUser.phone = phone
         if (gender) searchedUser.gender = gender
+        if (dob) searchedUser.dob = new Date(dob).getTime()
         if (work) {
             work.forEach(item => {
                 item.from = new Date(item.from).getTime()

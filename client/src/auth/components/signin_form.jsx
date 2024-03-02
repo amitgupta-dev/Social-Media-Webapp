@@ -15,7 +15,7 @@ const SigninForm = () => {
         event.preventDefault()
         try {
             setLoading(true)
-            await axios.post("http://localhost:5000/auth/login", signin_data, { withCredentials: true })
+            await axios.post(`${import.meta.env.VITE_SERVER_BASE_URL}/auth/login`, signin_data, { withCredentials: true })
             navigate('/')
         }
         catch (err) {

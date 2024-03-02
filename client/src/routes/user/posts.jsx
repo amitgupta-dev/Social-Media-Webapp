@@ -1,7 +1,12 @@
 import Post from '../../components/post'
 import React from 'react'
+import { useGetPostsQuery } from '../../redux/requests/post'
+import { useParams } from 'react-router-dom'
 
 const Posts = () => {
+
+    const { id } = useParams()
+    const { data, error, isLoading } = useGetPostsQuery(`createdBy=${id}`)
     return (
         <section title="posts" className=" my-5 flex flex-col gap-5 w-full max-w-[1050px] mx-auto">
             <div className="px-2 py-2 bg-pink-100 dark:bg-gray-800 shadow rounded-full w-full">
@@ -10,10 +15,8 @@ const Posts = () => {
                     <input type="text" className="bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:caret-gray-500 border border-gray-400 rounded-xl mx-2 my-1 w-full focus:outline-none focus:border-gray-500 px-4" placeholder=" What's in your mind ?" />
                 </div>
             </div>
-            <Post image="https://images.pexels.com/photos/214574/pexels-photo-214574.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
-            <Post image="https://images.pexels.com/photos/3656518/pexels-photo-3656518.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
-            <Post image="https://images.pexels.com/photos/214574/pexels-photo-214574.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
-            <Post image="https://images.pexels.com/photos/3656518/pexels-photo-3656518.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
+            {console.log(data)}
+            {data?.posts?.map(post => <Post postData={post} />)}
         </section>
     )
 }

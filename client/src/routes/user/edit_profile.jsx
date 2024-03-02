@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import * as yup from "yup"
 import { MdAddCircleOutline } from "react-icons/md"
 import { FiUpload } from "react-icons/fi"
@@ -9,8 +9,33 @@ import PlacesLived from "./components/placesLived"
 import AddEducation from "./components/addEducation"
 import AddPlacesLived from "./components/addPlacesLived"
 import { useDispatch, useSelector } from "react-redux"
-import { setAvatar, setCover, setAbout, setDob, setEmail, setFamilyType, setGender, setName, setNickname, setPhone, setQuote, setRelationship } from "../../redux/slices/EditProfileSlice"
+import {
+    setAvatar,
+    setCover,
+    setAbout,
+    setDob,
+    setEmail,
+    setFamilyType,
+    setGender,
+    setName,
+    setNickname,
+    setPhone,
+    setQuote,
+    setRelationship,
+    setWork,
+    setEducation,
+    setPlacesLived,
+    addWork,
+    addEducation,
+    addPlacesLived,
+    setWorkField,
+    setEducationField,
+    setPlacesLivedField,
+} from "../../redux/slices/EditProfileSlice"
 import axios from "axios"
+
+import { getFormattedDate } from '../../utils/getFormattedDate'
+import { fetchUserData } from "../../redux/slices/userSlice"
 
 const fromSchema = yup.object({
     avatar: yup.string(),
@@ -26,18 +51,21 @@ const fromSchema = yup.object({
     about: yup.string().nullable(),
     quote: yup.string().nullable(),
     work: yup.array(yup.object({
+        _id: yup.string().nullable(),
         position: yup.string(),
         organization: yup.string(),
         from: yup.number(),
         to: yup.number()
     })).nullable(),
     education: yup.array(yup.object({
+        _id: yup.string().nullable(),
         course: yup.string(),
         organization: yup.string(),
         from: yup.number(),
         to: yup.number()
     })).nullable(),
     placesLived: yup.array(yup.object({
+        _id: yup.string().nullable(),
         location: yup.string(),
         from: yup.number(),
         to: yup.number()
@@ -55,29 +83,116 @@ const EditProfile = () => {
 
     const [images, setImages] = useState({})
 
-    const profileData = useSelector((state) => state.editProfile)
+    const editedData = useSelector((state) => state.editProfile)
+    const user = useSelector((state) => state.user)
+
+    useEffect(() => {
+        if (user.data) {
+            dispatch(setAvatar(user.data.avatar || ""))
+            dispatch(setCover(user.data.cover || ""))
+            dispatch(setAbout(user.data.about || ""))
+            dispatch(setDob(getFormattedDate(user.data.dob) || ""))
+            dispatch(setEmail(user.data.email || ""))
+            dispatch(setFamilyType(user.data.familyType || ""))
+            dispatch(setGender(user.data.gender || ""))
+            dispatch(setName(user.data.name || ""))
+            dispatch(setNickname(user.data.nickname || ""))
+            dispatch(setPhone(user.data.phone || ""))
+            dispatch(setQuote(user.data.quote || ""))
+            dispatch(setRelationship(user.data.relationship || ""))
+            if (user.data?.work.length > 0) {
+                let workPayload = user.data.work.map(item => ({
+                    ...item,
+                    from: getFormattedDate(item.from),
+                    to: getFormattedDate(item.to)
+                }))
+                dispatch(setWork(workPayload))
+            }
+            if (user.data?.education.length > 0) {
+                let educationPayload = user.data.education.map(item => ({
+                    ...item,
+                    from: getFormattedDate(item.from),
+                    to: getFormattedDate(item.to)
+                }))
+                dispatch(setEducation(educationPayload))
+            }
+            if (user.data?.placesLived.length > 0) {
+                let placesLivedPayload = user.data.placesLived.map(item => ({
+                    ...item,
+                    from: getFormattedDate(item.from),
+                    to: getFormattedDate(item.to)
+                }))
+                dispatch(setPlacesLived(placesLivedPayload))
+            }
+        }
+        console.log(editedData)
+    }, [user.data])
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-        if (images.avatar) {
-            const url = await uploadImage(images.avatar)
-            dispatch(setAvatar(url))
+        try {
+            if (images.avatar) {
+                const url = await uploadImage(images.avatar, "avatar")
+                dispatch(setAvatar(url))
+            }
+            if (images.cover) {
+                const url = await uploadImage(images.cover, "cover")
+                console.log(url)
+                dispatch(setCover(url))
+            }
+            console.log(editedData)
+            const res = await axios.patch(`${import.meta.env.VITE_SERVER_BASE_URL}/user`, editedData, { withCredentials: true })
+            // dispatch(fetchUserData())
+            console.log(res.data)
         }
-        if (images.cover) {
-            const url = await uploadImage(images.cover)
-            dispatch(setCover(url))
+        catch (error) {
+            console.log(error)
         }
-        const res = await axios.patch("/api/user/update")
-        console.log(profileData)
     }
 
-    const uploadImage = async (file) => {
+    const uploadImage = async (file, fileType) => {
         if (file) {
+
             const imageForm = new FormData()
             imageForm.append('file', file)
-            imageForm.append('upload_preset', "socialApp")
-            const res = await axios.post("https://api.cloudinary.com/v1_1/dfokdktd4/image/upload", imageForm)
-            console.log(res.data.url)
+
+            const preset = fileType === "cover" ? "coverPreset" : fileType === "avatar" ? "avatarPreset" : "basicPreset"
+            imageForm.append('upload_preset', preset)
+
+            const getUploadType = () => {
+                if (fileType === "avatar" || fileType === "cover") {
+                    imageForm.append('folder', "Avatars And Covers")
+                    return "image"
+                }
+                else if (fileType === "image") {
+                    imageForm.append('folder', "Images")
+                    return "image"
+                }
+                else if (fileType === "reel") {
+                    imageForm.append('folder', "Reels")
+                    return "video"
+                }
+                else if (fileType === "story") {
+                    imageForm.append('folder', "Stories")
+                    return "video"
+                }
+                else if (fileType === "video") {
+                    imageForm.append('folder', "Videos")
+                    return "video"
+                }
+                else {
+                    console.log('please select a fileType among "avatar", cover", image", reel", story", "video"')
+                }
+            }
+
+            const uploadType = getUploadType()
+
+            console.log(uploadType)
+
+            const res = await axios.post(`${import.meta.env.VITE_CLOUDINARY_BASE_URL}/${import.meta.env.VITE_CLOUDINARY_CLOUDNAME}/${uploadType}/upload`, imageForm)
+
+            console.log(res.data)
+
             return res.data.url
         }
     }
@@ -91,6 +206,7 @@ const EditProfile = () => {
                             <h6 className="text-blueGray-700 text-xl font-bold">
                                 My account
                             </h6>
+                            <button onClick={() => console.log(editedData)}>hello</button>
                         </div>
                     </div>
                 </div>
@@ -123,7 +239,7 @@ const EditProfile = () => {
                                     <label htmlFor="name" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         name
                                     </label>
-                                    <input type="text" id="name" onChange={(event) => dispatch(setName(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
+                                    <input type="text" id="name" value={editedData.name} onChange={(event) => dispatch(setName(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
                                 </div>
                             </div>
                             <div className="w-full md:w-1/2 px-4">
@@ -131,7 +247,7 @@ const EditProfile = () => {
                                     <label htmlFor="email" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         Email address
                                     </label>
-                                    <input type="email" id="email" onChange={(event) => dispatch(setEmail(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
+                                    <input type="email" id="email" value={editedData.email} onChange={(event) => dispatch(setEmail(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
                                 </div>
                             </div>
                             <div className="w-full md:w-1/2 px-4">
@@ -139,7 +255,7 @@ const EditProfile = () => {
                                     <label htmlFor="phone" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         Phone
                                     </label>
-                                    <input type="number" id="phone" onChange={(event) => dispatch(setPhone(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+                                    <input type="number" id="phone" value={editedData.phone} onChange={(event) => dispatch(setPhone(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
                                 </div>
                             </div>
                             <div className="w-full md:w-1/2 px-4">
@@ -147,15 +263,15 @@ const EditProfile = () => {
                                     <label htmlFor="dob" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         Date of Birth
                                     </label>
-                                    <input type="date" id="dob" onChange={(event) => dispatch(setDob(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
+                                    <input type="date" id="dob" value={editedData.dob} onChange={(event) => dispatch(setDob(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" required />
                                 </div>
                             </div>
                             <div className="w-full md:w-1/2 px-4">
                                 <div className="relative w-full mb-3">
                                     <label htmlFor="nickname" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
-                                        Nicknames
+                                        Nickname
                                     </label>
-                                    <input type="text" id="nickname" onChange={(event) => dispatch(setNickname(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+                                    <input type="text" id="nickname" value={editedData.nickname} onChange={(event) => dispatch(setNickname(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
                                 </div>
                             </div>
                             <div className="w-full md:w-1/2 px-4">
@@ -164,19 +280,19 @@ const EditProfile = () => {
                                     <div className='flex gap-5 py-4 text-md'>
                                         <div className="form-control">
                                             <label className="label cursor-pointer">
-                                                <input type="radio" onChange={(event) => dispatch(setGender(event.target.value))} name="gender" value="Male" required />
+                                                <input type="radio" checked={editedData.gender === "Male"} onChange={(event) => dispatch(setGender(event.target.value))} name="gender" value="Male" required />
                                                 <span className="label-text px-2">Male</span>
                                             </label>
                                         </div>
                                         <div className="form-control">
                                             <label className="label cursor-pointer">
-                                                <input type="radio" onChange={(event) => dispatch(setGender(event.target.value))} name="gender" value="Female" required />
+                                                <input type="radio" checked={editedData.gender === "Female"} onChange={(event) => dispatch(setGender(event.target.value))} name="gender" value="Female" required />
                                                 <span className="label-text px-2">Female</span>
                                             </label>
                                         </div>
                                         <div className="form-control">
                                             <label className="label cursor-pointer">
-                                                <input type="radio" onChange={(event) => dispatch(setGender(event.target.value))} name="gender" value="Others" required />
+                                                <input type="radio" checked={editedData.gender === "Others"} onChange={(event) => dispatch(setGender(event.target.value))} name="gender" value="Others" required />
                                                 <span className="label-text px-2">Others</span>
                                             </label>
                                         </div>
@@ -188,7 +304,7 @@ const EditProfile = () => {
                                     <label htmlFor="familyType" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         Family Type
                                     </label>
-                                    <input type="text" id="familyType" onChange={(event) => dispatch(setFamilyType(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+                                    <input type="text" id="familyType" value={editedData.familyType} onChange={(event) => dispatch(setFamilyType(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
                                 </div>
                             </div>
                             <div className="w-full md:w-1/2 px-4">
@@ -196,7 +312,7 @@ const EditProfile = () => {
                                     <label htmlFor="relationship" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         Relatinoship
                                     </label>
-                                    <input type="text" id="relationship" onChange={(event) => dispatch(setRelationship(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+                                    <input type="text" id="relationship" value={editedData.relationship} onChange={(event) => dispatch(setRelationship(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
                                 </div>
                             </div>
                             <div className="w-full lg:w-full px-4">
@@ -204,7 +320,7 @@ const EditProfile = () => {
                                     <label htmlFor="about" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         About me
                                     </label>
-                                    <textarea id="about" onChange={(event) => dispatch(setAbout(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" rows={5} />
+                                    <textarea id="about" value={editedData.about} onChange={(event) => dispatch(setAbout(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" rows={5} />
                                 </div>
                             </div>
                             <div className="w-full px-4 mb-4">
@@ -212,7 +328,7 @@ const EditProfile = () => {
                                     <label htmlFor="quote" className="block uppercase text-blueGray-600 text-xs font-bold mb-2">
                                         Quote
                                     </label>
-                                    <input id="quote" type="text" onChange={(event) => dispatch(setQuote(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
+                                    <input id="quote" value={editedData.quote} type="text" onChange={(event) => dispatch(setQuote(event.target.value))} className="p-3 placeholder-blueGray-300 text-blueGray-600 border-2 border-gray-300 bg-gray-100 rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" />
                                 </div>
                             </div>
                         </div>
@@ -222,7 +338,7 @@ const EditProfile = () => {
                             Work
                         </h6>
                         {
-                            profileData.work?.map((item, index) => <WorkCard key={index} index={index} />)
+                            editedData.work?.map((item, index) => <WorkCard key={index} index={index} />)
                         }
                         <div className="w-full px-4 mb-6">
                             <button type="button" onClick={() => setIsAddingWork(true)} className="flex justify-center w-full gap-2 border-gray-300 bg-gray-100 hover:bg-gray-200 border-2 focus:outline-none font-medium rounded-lg text-md px-auto py-2 dark:bg-gray-700 dark:focus:bg-gray-800"><MdAddCircleOutline size={23} color="black" /> Add Work</button>
@@ -233,7 +349,7 @@ const EditProfile = () => {
                             Education
                         </h6>
                         {
-                            profileData.education?.map((item, index) => <EducationCard key={index} index={index} />)
+                            editedData.education?.map((item, index) => <EducationCard key={index} index={index} />)
                         }
                         <div className="w-full px-4 mb-6">
                             <button type="button" onClick={() => setIsAddingEducation(true)} className="flex justify-center w-full gap-2 border-gray-300 bg-gray-100 hover:bg-gray-200 border-2 focus:outline-none font-medium rounded-lg text-md px-auto py-2 dark:bg-gray-700 dark:focus:bg-gray-800"><MdAddCircleOutline size={23} color="black" /> Add Education</button>
@@ -244,12 +360,12 @@ const EditProfile = () => {
                             Places Lived
                         </h6>
                         {
-                            profileData.placesLived?.map((item, index) => <PlacesLived key={index} index={index} />)
+                            editedData.placesLived?.map((item, index) => <PlacesLived key={index} index={index} />)
                         }
                         <div className="w-full px-4 mb-6">
                             <button type="button" onClick={() => setIsAddingLocation(true)} className="flex justify-center w-full gap-2 border-gray-300 bg-gray-100 hover:bg-gray-200 border-2 focus:outline-none font-medium rounded-lg text-md px-auto py-2 dark:bg-gray-700 dark:focus:bg-gray-800"><MdAddCircleOutline size={23} color="black" /> Add Location</button>
                         </div>
-                        <button className="flex gap-2 m-4 bg-blue-600 text-white hover:bg-blue-700 border-2 focus:outline-none font-medium rounded-lg text-md px-4 py-2 dark:bg-gray-700 dark:focus:bg-gray-800">Save</button>
+                        <button type="submit" className="flex gap-2 m-4 bg-blue-600 text-white hover:bg-blue-700 border-2 focus:outline-none font-medium rounded-lg text-md px-4 py-2 dark:bg-gray-700 dark:focus:bg-gray-800">Save</button>
                     </form>
                 </div>
             </div >

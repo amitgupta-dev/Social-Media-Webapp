@@ -36,8 +36,12 @@ const getPosts = async (req, res) => {
             const skipValue = pageNumber === 0 ? 0 : limitValue * (pageNumber - 1)
 
             const posts = await Post.find(filter)
+                .populate({ path: "createdBy", select: "avatar name" })
                 .limit(limitValue)
                 .skip(skipValue)
+                .exec()
+
+            console.log(posts)
             return res.json({
                 success: true,
                 message: "post fetched successfully",
@@ -46,6 +50,7 @@ const getPosts = async (req, res) => {
         }
     }
     catch (error) {
+        console.error(error)
         return res.json({
             success: false,
             message: "something went wrong"

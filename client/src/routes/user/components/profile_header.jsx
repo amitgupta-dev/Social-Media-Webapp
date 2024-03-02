@@ -1,22 +1,28 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import UserNav from './user_nav'
 import { BsThreeDots } from "react-icons/bs"
 import { RiPencilFill } from "react-icons/ri"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
+import { useDispatch, useSelector } from 'react-redux'
 
 const ProfileHeader = () => {
+
+    const { id } = useParams()
+    const user = useSelector(state => state.user)
+    const dispatch = useDispatch()
+
     return (
-        <div className='relative flex flex-col w-full shadow-lg'>
-            <div className='relative flex items-center justify-center w-full aspect-[2.8/1] overflow-hidden lg:rounded-b-lg'>
-                <img src="/assets/images/bg.jpeg" className='w-full' alt='bg' />
+        <div className='relative flex flex-col w-[100vw] shadow-lg'>
+            <div className='relative flex items-center justify-center aspect-[3/1] overflow-hidden lg:rounded-b-lg  lg:max-w-[1024px] lg:mx-auto'>
+                {user?.data && <img src={user?.data?.cover} className='w-full h-full' alt='bg' />}
             </div>
-            <div className='relative flex items-center justify-center w-[25vh] translate-y-[-12vh] sm:w-[30vh] transform sm:translate-y-[-15vh] translate-x-[2.5vw] border-white border-[7px] rounded-full overflow-hidden aspect-square'>
-                <img src="/assets/images/propic.jpg" className='w-full' alt='bg' />
+            <div className='relative flex items-center justify-center w-[25%] max-w-[200px] translate-y-[-12vh] sm:w-[30vh] transform sm:translate-y-[-15vh] translate-x-[2.5vw] lg:translate-x-[calc(50vw-450px)] border-white border-[7px] rounded-full overflow-hidden aspect-square'>
+                {user?.data && <img src={user?.data?.avatar} className='w-full' alt='bg' />}
             </div>
             <div className='relative mt-[-12vh]'>
-                <div className='md:absolute w-full md:w-[calc(100%-36vh)] transform md:translate-y-[-15vh] px-5 md:pl-0 mb-2 md:mb-0 md:ml-[36vh] flex flex-wrap gap-2 justify-between items-center'>
+                <div className='flex flex-wrap gap-2 justify-between items-center md:absolute md:left-[50%]  md:translate-x-[-180px] lg:translate-x-[-250px] w-full md:w-[70%] max-w-[800px] transform md:translate-y-[-15vh] px-5 md:pl-0 mb-2 md:mb-0'>
                     <div>
-                        <p className='text-4xl font-bold '>Amit Gupta</p>
+                        <p className='text-4xl font-bold '>{user?.data?.name}</p>
                         <p className='font-semibold opacity-80'>45 friends</p>
                     </div>
                     <div className='flex gap-2'>

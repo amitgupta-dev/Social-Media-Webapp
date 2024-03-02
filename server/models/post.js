@@ -9,7 +9,7 @@ const PostSchema = new mongoose.Schema({
     postLocation: {
         type: String,
         required: true,
-        enum: ["group", "page", "user"]
+        enum: ["group", "page", "timeline"]
     },
     isApproved: {
         type: Boolean,

@@ -3,13 +3,16 @@ import SigninSlice from './slices/SigninSlice'
 import SignupSlice from './slices/SignupSlice'
 import EditProfileSlice from './slices/EditProfileSlice'
 import UserSlice from './slices/userSlice'
+import { postsApi } from './requests/post'
 
 export const store = configureStore({
     reducer: {
         signup: SignupSlice,
         signin: SigninSlice,
         user: UserSlice,
-        editProfile: EditProfileSlice
+        editProfile: EditProfileSlice,
+        [postsApi.reducerPath]: postsApi.reducer,
     },
-    devTools: process.env.NODE_ENV !== 'production',
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(postsApi.middleware),
+    devTools: true,
 })

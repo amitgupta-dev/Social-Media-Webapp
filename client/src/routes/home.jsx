@@ -8,27 +8,17 @@ import { SiFeedly } from "react-icons/si"
 import { HiUserGroup } from "react-icons/hi"
 import { BiSolidVideos } from "react-icons/bi"
 import Contact from '../components/contact'
-import axios from 'axios'
-
-const fetchUserData = async () => {
-  try {
-    const res = await axios.get('http://localhost:3000/api/user/get')
-    console.log("res:", res)
-    return res.data.user
-  }
-  catch (error) {
-    console.log("error:", error)
-    return error
-  }
-}
+import { useSelector } from 'react-redux'
+import { useGetPostsQuery } from '../redux/requests/post'
 
 const Home = () => {
 
-  // const userData = await fetchUserData()
+  const { data, error, isLoading } = useGetPostsQuery()
+  const user = useSelector(state => state.user)
   return (
     <>
       <Sidebar options={[
-        { icon: <FaCircleUser size={25} />, label: "hello", to: "/657d2c4c45b9956d156c8238" },
+        { icon: <FaCircleUser size={25} />, label: user.data?.name, to: user.data?._id },
         { icon: <FaUserFriends size={25} />, label: "Find Friends", to: "/friends" },
         { icon: <HiUserGroup size={25} />, label: "Groups", to: "/groups" },
         { icon: <SiFeedly size={25} />, label: "Feeds", to: "/" },
@@ -51,10 +41,9 @@ const Home = () => {
               <input type="text" className="bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:caret-gray-500 border border-gray-400 rounded-xl mx-2 my-1 w-full focus:outline-none focus:border-gray-500 px-4" placeholder=" What's in your mind ?" />
             </div>
           </div>
-          <Post image="https://images.pexels.com/photos/214574/pexels-photo-214574.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
-          <Post image="https://images.pexels.com/photos/3656518/pexels-photo-3656518.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
-          <Post image="https://images.pexels.com/photos/214574/pexels-photo-214574.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
-          <Post image="https://images.pexels.com/photos/3656518/pexels-photo-3656518.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" />
+          {
+            data?.posts?.map(post => <Post postData={post} />)
+          }
         </section>
       </div >
       <div className="px-5 w-[25%] hidden lg:block mx-2 bg-blue-50 dark:bg-gray-900">

@@ -14,8 +14,6 @@ const getUser = async (req, res) => {
             })
         }
 
-        console.log(searchedUser)
-
         searchedUser.password = undefined
 
         return res.status(201).json({
